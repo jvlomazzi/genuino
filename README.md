@@ -1,4 +1,4 @@
-# Chatbot para Identificação de Fake News
+# Chatbot para Identificação de Fake News no WhatsApp
 **Projeto de conclusão do curso de Sistemas de Informação.**
 
 O Chatbot opera através do WhatsApp classificando notícias, capacitado por aprendizado prévio. 
