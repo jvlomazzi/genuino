@@ -1,0 +1,7 @@
+tensorflow==2.2
+numpy
+pandas
+matplotlib
+sklearn
+seaborn
+pytesseract
