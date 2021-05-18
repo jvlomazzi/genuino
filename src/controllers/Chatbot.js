@@ -1,6 +1,6 @@
 const pyshell = require('python-shell');
 const fs = require('fs');
-module.exports = class Chat {
+module.exports = class Chatbot {
     apresentacao = 'Olá eu sou o *Genuíno* 👴, um robô criado para te auxiliar na checagem de fatos.\n\n' +
     '📰 Basta você me enviar uma notícia e eu direi se ela é falsa ou não.\n' +
     '🟢 Consigo ler mensagens através de capturas de tela (do título da notícia) e também por texto.\n\n' +
@@ -8,6 +8,7 @@ module.exports = class Chat {
     
     message;
 
+    route = "config/routes.py";
     options = {
         // scriptPath: 'src/controllers',
         pythonOptions: ['-u'],
@@ -39,14 +40,16 @@ module.exports = class Chat {
     }
 
     
-    verifyMessage(message) {
+    verifyMessage(client, message) {
         let type = message.type;
         let body = message.body;
+        console.log(type)
         switch(type){
-            case 'text':
-                console.log("uepa")
+            case 'chat':
+                this.getTextData(client, body)
                 break;
             case 'image':
+                this.sendImageToServer(client, message);
                 break;
             default:
                 console.log("Tipo invalido de mensagem.")
@@ -54,6 +57,30 @@ module.exports = class Chat {
         }
     }
 
+    getTextData(client, body){
+        console.log("start ------ getTextData");
+        //é url - enviar para backend fazer a predição de dados
+        //precisa enviar apresentacao
+        //precisa de ajuda - enviar para backend chatterbot
+        if(this.validURL(body)){
+            console.log("É url");
+            this.setServerArgs('url');
+            this.setServerArgs(body);
+            this.sendToServer();
+        }else{
+            console.log("Não é url");
+        }
+    }
+
+    validURL(str) {
+        var pattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
+          '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+ // domain name
+          '((\\d{1,3}\\.){3}\\d{1,3}))'+ // OR ip (v4) address
+          '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+ // port and path
+          '(\\?[;&a-z\\d%_.~+=-]*)?'+ // query string
+          '(\\#[-a-z\\d_]*)?$','i'); // fragment locator
+        return !!pattern.test(str);
+      }
     /**
      * Verifica se é uma mensagem de resposta imediata, como por exemplo "Olá", "Ajude-me".
      * Mensagens de respostas NÃO imediatas podem ser enviadas seguidas de um link, fazendo com que o chatbot pule uma etapa.
@@ -61,6 +88,15 @@ module.exports = class Chat {
     // isImmediateAnswer(){
 
     // }
+
+    /**
+     * 
+     * @param {*} args Pode ser utilizado quantas vezes for necessário, porém,
+     * a primeira chamada para definir o argumento deve ser para definir o nome da rota.
+     */
+    setServerArgs(args){
+        this.options.args.push(args);
+    }
 
     setMessage(message) {
         this.message = message;
@@ -80,20 +116,8 @@ module.exports = class Chat {
         return  res;
     }
 
-    imageMessageControl(client, message) {
-        let type = message.type;
-
-        if(type == 'image'){
-            this.getImageFromMessage(client, message);
-            return true;
-        }else if(type == 'text'){
-            return false;
-        }
-    }
-
-    async getImageFromMessage(client, message){
+    async sendImageToServer(client, message){
         var promise = client.downloadMedia(message.id);
-        // var options = this.options;
         var chat = this;
         await promise.then(function(val){
             chat.setMessage(val);
@@ -102,21 +126,20 @@ module.exports = class Chat {
             };
             base64 = JSON.stringify(base64);
             fs.writeFile('tokens/base64.json', base64, 'utf8', function(errfs, resfs){
-                if(errfs) 
+                if(errfs){ 
                     throw errfs; 
-                else 
-                    pyshell.PythonShell.run("controllers/misc.py", chat.options, function(err, res){ if(err) throw err; else console.log(res); });
+                }else{
+                    this.setServerArgs('image');
+                    this.sendToServer();
+                }
             });
-            // chat.options.args.push(val)
         }).catch(function(err){
             console.log(err)
         });
     }
 
-    // splitEncode(encode){
-    //     let len = (encode.length);
-    //     this.options.args = [encode.slice(0, (len/4)), encode.slice((len/4), (len/2)), encode.slice((len/2), (len - (len/4))), encode.slice((len - (len/4)), len)]
-    //     console.log(this.options.args)
-    // }
+    async sendToServer(){
+        pyshell.PythonShell.run(this.route, this.options, function(err, res){ if(err) throw err; else console.log(res); });
+    }
 
 }

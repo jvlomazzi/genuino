@@ -5,7 +5,7 @@ import json, sys
 import base64
 import pathlib
 import string
-PATH = "C:/Users/Joao/Documents/Projetos/TCC/fake-news-detector/src/"
+PATH = "C:/Users/Joao/Documents/Projetos/TCC/fake-news-detector/genuino/src/"
 pytesseract.pytesseract.tesseract_cmd = 'C:\\Program Files\\Tesseract-OCR\\tesseract.exe'
 
 # POSITIVE = ["sim", "s", "certo", "correto", "isso", "isso mesmo", "ok"]

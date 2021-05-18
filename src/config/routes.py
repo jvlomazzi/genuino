@@ -1,5 +1,9 @@
 import json, sys
-print(sys.argv[1])
+from controllers.load import Load
+
+
+load = Load()
+print(sys.argv[2])
 
 # from flask import Flask, jsonify, request, render_template
 

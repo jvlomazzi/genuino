@@ -1,6 +1,6 @@
 const venom = require('venom-bot');
 const pyshell = require('python-shell');
-const Chat = require('./controllers/Chat');
+const Chatbot = require('./controllers/Chatbot');
 
 // function start(client) {
 // 	client.onAnyMessage((message) => {
@@ -36,7 +36,7 @@ const Chat = require('./controllers/Chat');
 // 	args : ['news', message.body]
 // }
 venom.create().then((client) => {
-	const chat = new Chat(client);
+	const chatbot = new Chatbot(client);
 	// pyshell.PythonShell.run('routes.py', options, function(err, res){
 	// 	if(err)	throw err;
 	// 	console.log(res)
