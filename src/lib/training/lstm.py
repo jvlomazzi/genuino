@@ -13,8 +13,8 @@ import seaborn as sns
 
 plt.style.use('ggplot')
 
-fake_df = pd.read_csv("src/neural_network/dataset/Fake.br/Fake.csv")
-real_df = pd.read_csv("src/neural_network/dataset/Fake.br/True.csv")
+fake_df = pd.read_csv("src/lib/dataset/Fake.br/Fake.csv")
+real_df = pd.read_csv("src/lib/dataset/Fake.br/True.csv")
 
 fake_df.isnull().sum()
 real_df.isnull().sum()
@@ -29,22 +29,22 @@ real_df['class'] = 1
 
 
 plt.figure(figsize=(10, 5))
-plt.bar('Fake News', len(fake_df), color='orange')
-plt.bar('Real News', len(real_df), color='green')
-plt.title('Distribution of Fake News and Real News', size=15)
-plt.xlabel('News Type', size=15)
-plt.ylabel('# of News Articles', size=15)
+plt.bar('Notícia Falsa', len(fake_df), color='red')
+plt.bar('Notícia Real', len(real_df), color='blue')
+plt.title('Arranjo de notícias Reais e Falsas', size=15)
+plt.xlabel('Tipo', size=15)
+plt.ylabel('Nº de artigos', size=15)
 
 
 total_len = len(fake_df) + len(real_df)
 plt.figure(figsize=(10, 5))
-plt.bar('Fake News', len(fake_df) / total_len, color='orange')
-plt.bar('Real News', len(real_df) / total_len, color='green')
-plt.title('Distribution of Fake News and Real News', size=15)
-plt.xlabel('News Type', size=15)
-plt.ylabel('Proportion of News Articles', size=15)
+plt.bar('Notícia Falsa', len(fake_df) / total_len, color='red')
+plt.bar('Notícia Real', len(real_df) / total_len, color='blue')
+plt.title('Arranjo de notícias Reais e Falsas', size=15)
+plt.xlabel('Tipo', size=15)
+plt.ylabel('Proporção dos artigos', size=15)
 
-print('Difference in news articles:',len(fake_df)-len(real_df))
+print('Diferença entre os tipos:',  len(fake_df)-len(real_df))
 
 news_df = pd.concat([fake_df, real_df], ignore_index=True, sort=False)
 
@@ -54,8 +54,16 @@ news_df = pd.concat([fake_df, real_df], ignore_index=True, sort=False)
 features = news_df['preprocessed_news']
 targets = news_df['class']
 
+# stop = set(stopwords.words('portuguese'))
+# punctuation = list(string.punctuation)
+# stop.update(punctuation)
+# def remove_stopwords(text):
+#     final_text = []
+#     for i in text.split():
+#         if i.strip().lower() not in stop:
+#             final_text.append(i.strip())
+#     return " ".join(final_text)
 X_train, X_test, y_train, y_test = train_test_split(features, targets, test_size=0.20, random_state=18)
-
 def normalize(data):
     normalized = []
     for i in data:
@@ -88,7 +96,7 @@ X_test = tf.keras.preprocessing.sequence.pad_sequences(X_test, padding='post', m
 model = tf.keras.Sequential([
     tf.keras.layers.Embedding(max_vocab, 32),
     tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(64,  return_sequences=True)),
-    tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(16)),
+    tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(32)),
     tf.keras.layers.Dense(64, activation='relu'),
     tf.keras.layers.Dropout(0.5),
     tf.keras.layers.Dense(1)
@@ -103,8 +111,8 @@ model.compile(loss=tf.keras.losses.BinaryCrossentropy(from_logits=True),
               metrics=['accuracy'])
 
 history = model.fit(X_train, y_train, epochs=10,validation_split=0.1, batch_size=30, shuffle=True, callbacks=[early_stop])
-model.save('src/neural_network/model/rnn')
-with open('src/neural_network/model/rnn/tokenizer.pickle', 'wb') as handle:
+model.save('src/lib/model/rnn')
+with open('src/lib/model/rnn/tokenizer.pickle', 'wb') as handle:
     pickle.dump(tokenizer, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 history_dict = history.history
@@ -125,11 +133,11 @@ plt.legend(prop={'size': 20})
 plt.show()
 
 plt.figure(figsize=(12,9))
-plt.plot(epochs, acc, 'g', label='Training acc')
-plt.plot(epochs, val_acc, 'b', label='Validation acc')
-plt.title('Training and validation accuracy', size=20)
-plt.xlabel('Epochs', size=20)
-plt.ylabel('Accuracy', size=20)
+plt.plot(epochs, acc, 'g', label='Acurácia de Treinamento')
+plt.plot(epochs, val_acc, 'b', label='Acurácia de validação')
+plt.title('Acurácia do modelo', size=20)
+plt.xlabel('Épocas', size=20)
+plt.ylabel('Acurácia', size=20)
 plt.legend(prop={'size': 20})
 plt.ylim((0.5,1))
 plt.show()
@@ -152,15 +160,16 @@ print('Recall on testing set:', recall_score(binary_predictions, y_test))
 
 matrix = confusion_matrix(binary_predictions, y_test, normalize='all')
 plt.figure(figsize=(16, 10))
-ax= plt.subplot()
+ax = plt.subplot()
 sns.heatmap(matrix, annot=True, ax = ax)
 
 # labels, title and ticks
-ax.set_xlabel('Predicted Labels', size=20)
-ax.set_ylabel('True Labels', size=20)
-ax.set_title('Confusion Matrix', size=20) 
-ax.xaxis.set_ticklabels([0,1], size=15)
-ax.yaxis.set_ticklabels([0,1], size=15)
+ax.set_xlabel('Indicadores previstos', size=20)
+ax.set_ylabel('Indicadores reais', size=20)
+ax.set_title('Matriz de Confusão', size=20) 
+ax.xaxis.set_ticklabels(['Falso', 'Real'], size=15)
+ax.yaxis.set_ticklabels(['Falso', 'Real'], size=15)
+plt.show()
 
 e = model.layers[0]
 weights = e.get_weights()[0]

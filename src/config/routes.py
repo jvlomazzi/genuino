@@ -1,7 +1,6 @@
 import json, sys
 from controllers.load import Load
 
-
 load = Load()
 print(sys.argv[2])
 

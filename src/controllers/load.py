@@ -3,7 +3,7 @@ import pickle
 from tensorflow.keras.models import load_model
 
 class Load:
-    path = 'src/lib/model'
+    path = 'src/lib/model/'
     neural_networks = []
 
     def __init__(self):
@@ -24,17 +24,25 @@ class Load:
     
     def set_tokenizers(self, index):
         if(index < len(self.neural_networks)):
-            with open(self.path + self.neural_networks[index]['name'] +'/tokenizer.pickle', 'rb') as handle:
+            with open(self.neural_networks[index]['name'] +'/tokenizer.pickle', 'rb') as handle:
                 self.neural_networks[index]['tokenizer'] = pickle.load(handle)
+            return self.set_tokenizers(index+1)
         else:
-            return 1;
+            return 1
 
     def set_models(self, index):
         if(index < len(self.neural_networks)):
-            self.neural_networks[index]['model'] = load_model(self.path + self.neural_networks[index]['name'])
-            return self.models(index+1)
+            self.neural_networks[index]['model'] = load_model(self.neural_networks[index]['name'])
+            return self.set_models(index+1)
         else:
-            return 1;
+            return 1
     
     def model(self, model):
-        # model for model in neural_networks['name']: 
+        for x in self.neural_networks:
+            if(x['name'] == model):
+                print(x)
+                return x
+
+load = Load()
+
+load.model('lstm')
