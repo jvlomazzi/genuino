@@ -5,11 +5,15 @@ import json, sys
 import base64
 import pathlib
 import string
+from newsfetch.news import newspaper
 PATH = "C:/Users/Joao/Documents/Projetos/TCC/fake-news-detector/genuino/src/"
 pytesseract.pytesseract.tesseract_cmd = 'C:\\Program Files\\Tesseract-OCR\\tesseract.exe'
 
 # POSITIVE = ["sim", "s", "certo", "correto", "isso", "isso mesmo", "ok"]
 # NEGATIVE = ["não", "n", "errado", "incorreto", "não é isso", "está errado", "ok"]
+
+news = newspaper('http://www.agendadopoder.com/lstarticle.aspx?id=3623')
+print(news.article)
 
 file = open(PATH + "tokens/base64.json")
 data = json.load(file)

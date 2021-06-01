@@ -55,7 +55,7 @@ features = news_df['preprocessed_news']
 targets = news_df['class']
 
 X_train, X_test, y_train, y_test = train_test_split(features, targets, test_size=0.20, random_state=18)
-
+stop_words = set(nltk.corpus.stopwords.words("portuguese"))
 def normalize(data):
     normalized = []
     for i in data:
