@@ -41,5 +41,28 @@ if not sys.stdin.isatty():
                 'feedback': mongodb
             }.get(line.rstrip(), default)()
 else:
-    sys.stdout.write("Servidor finalizou o request.")
+    print("Servidor finalizou o request.")
+
+# import json, sys
+
+# if not sys.stdin.isatty():
+
+#     def chat_response():
+#         print(variavel)
+
+#     def default():
+#         print("Nao foi possivel continuar a solicitacao")
+
+#     # print(sys.stdin)
+#     for line in sys.stdin:
+#         data = json.loads(line)
+#         print(data[:1])
+#         if line.rstrip() == 'initialize':
+#             variavel = "\nteste apenas vamos verificar"
+#             print("O servidor carregou os modelos de predicao.")
+
+#         else:
+#             print("finalizou")
+# else:
+#     print("Servidor finalizou o request.")
 
