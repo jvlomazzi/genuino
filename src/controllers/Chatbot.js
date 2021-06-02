@@ -1,6 +1,7 @@
 const venom = require('venom-bot');
 const pyshell = require('python-shell');
 const fs = require('fs');
+const fetch = require("node-fetch");
 
 module.exports = class Chatbot {
     apresentacao = 'Olá eu sou o *Genuíno* 👴, um robô criado para te auxiliar na checagem de fatos.\n\n' +
@@ -146,7 +147,10 @@ module.exports = class Chatbot {
     }
 
     async sendToServer(){
-        pyshell.PythonShell.run(this.route, this.options, function(err, res){ if(err) throw err; else console.log(res); });
+        let response = await fetch('http://localhost:5000/start');
+        let myJson = await response.json(); //extract JSON from the http response
+        console.log(myJson);
+        // pyshell.PythonShell.run(this.route, this.options, function(err, res){ if(err) throw err; else console.log(res); });
     }
     
     sendToClient(){
