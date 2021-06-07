@@ -3,8 +3,8 @@ from load import Load
 from newsfetch.news import newspaper
 from tensorflow.keras.models import load_model
 import tensorflow as tf
-
-lstm = []
+import asyncio
+import time
 
 if not sys.stdin.isatty():
     def load():
@@ -12,11 +12,11 @@ if not sys.stdin.isatty():
         return load.model('lstm')
 
     def chat_response():
-        print("chat")
+        print('chat')
 
     def prediction():
         news = []
-        text = newspaper(sys.argv[2])
+        text = newspaper(data["data"])
         news.append(text.article)
         news = lstm['tokenizer'].texts_to_sequences(news)
         news = tf.keras.preprocessing.sequence.pad_sequences(news, padding='post', maxlen=256)
@@ -30,39 +30,16 @@ if not sys.stdin.isatty():
         print("Nao foi possivel continuar a solicitacao")
 
     for line in sys.stdin:
-        if line.rstrip() == 'initialize':
+        data = json.loads(line)
+        if data["type"] == 'start':
             lstm = load()
-            print("O servidor carregou os modelos de predicao.")
+            print("Modelo carregado")
         else:
             {
                 'chat': chat_response,
                 'url': prediction,
                 'image': prediction,
                 'feedback': mongodb
-            }.get(line.rstrip(), default)()
+            }.get(data["type"], default)()
 else:
     print("Servidor finalizou o request.")
-
-# import json, sys
-
-# if not sys.stdin.isatty():
-
-#     def chat_response():
-#         print(variavel)
-
-#     def default():
-#         print("Nao foi possivel continuar a solicitacao")
-
-#     # print(sys.stdin)
-#     for line in sys.stdin:
-#         data = json.loads(line)
-#         print(data[:1])
-#         if line.rstrip() == 'initialize':
-#             variavel = "\nteste apenas vamos verificar"
-#             print("O servidor carregou os modelos de predicao.")
-
-#         else:
-#             print("finalizou")
-# else:
-#     print("Servidor finalizou o request.")
-

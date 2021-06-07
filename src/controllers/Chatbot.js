@@ -13,10 +13,7 @@ module.exports = class Chatbot {
     client;
     route = "controllers/routes.py";
     python;
-    options = {
-        pythonOptions: ['-u'],
-        args : []
-    }
+    post = { type: "", data: "" };
     
 
     constructor(){
@@ -47,18 +44,6 @@ module.exports = class Chatbot {
     // isImmediateAnswer(){
         
     // }
-    setEmptyArgs(){  
-        this.options.args = [];
-    }
-    /**
-     * 
-     * @param {*} args Pode ser utilizado quantas vezes for necessário, porém,
-     * a primeira chamada para definir o argumento deve ser para definir o nome da rota.
-     */
-    setServerArgs(args){
-        this.options.args.push(args);
-    }
-    
     setMessage(message) {
         this.message = message;
     }
@@ -89,8 +74,9 @@ module.exports = class Chatbot {
     }
 
     startBackendServer(){
-        this.setServerArgs('initialize');
-        this.sendToServer();
+        // this.setServerArgs('initialize');
+        this.post = { type: 'initialize' };
+        this.sendToServer('start');
     }
     
     verifyMessage(client, message) {
@@ -99,17 +85,20 @@ module.exports = class Chatbot {
         if(type == 'chat'){
             if (this.isValidUrl(body)){
                 console.log("chegou url");
-                this.setEmptyArgs();
-                this.setServerArgs('url');
-                this.setServerArgs(body);
+                this.post = {
+                    type: 'url',
+                    data: body
+                };
+                this.sendToServer('predict');
             }else{
                 console.log("chegou chat");
-                this.setEmptyArgs();
-                this.setServerArgs('chat');
-                this.setServerArgs(body);
+                this.post = {
+                    type: 'chat',
+                    data: body
+                };
+                this.sendToServer('chat');
             }
             
-            this.sendToServer();
         }else if (type == 'image'){
             this.sendImageToServer(message);
         }else{
@@ -146,8 +135,13 @@ module.exports = class Chatbot {
         });
     }
 
-    async sendToServer(){
-        let response = await fetch('http://localhost:5000/start');
+    async sendToServer(route){
+        var post = JSON.stringify(this.post);
+        let response = await fetch('http://localhost:5000/' + route, {
+            method: 'post',
+            body: post,
+            headers: { 'Content-Type': 'application/json' }
+        });
         let myJson = await response.json(); //extract JSON from the http response
         console.log(myJson);
         // pyshell.PythonShell.run(this.route, this.options, function(err, res){ if(err) throw err; else console.log(res); });

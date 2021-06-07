@@ -4,7 +4,7 @@ from tensorflow.keras.models import load_model
 import tensorflow as tf
 
 class Load:
-    path = './lib/model/' #'genuino/src/lib/model/'
+    path = '../lib/model/' #'genuino/src/lib/model/'
     neural_networks = []
 
     def __init__(self):
@@ -12,9 +12,6 @@ class Load:
         self.set_tokenizers(0)
         self.set_models(0)
     
-    def create_pickle(self, model):
-        with open(self.pickle_path + 'prediction_model.pickle', 'wb') as handle:
-            pickle.dump(model, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
     def set_networks(self):
         for x in os.walk(self.path):
@@ -47,5 +44,3 @@ class Load:
         for x in self.neural_networks:
             if(x['name'] == model):
                 return x
-
-load = Load()

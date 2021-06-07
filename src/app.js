@@ -1,3 +1,3 @@
-const Chatbot = require('./controllers/Chatbot');
+const Chatbot = require('./controllers/chatbot');
 
 let chatbot = new Chatbot();
