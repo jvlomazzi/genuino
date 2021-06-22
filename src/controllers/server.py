@@ -21,10 +21,10 @@ if not sys.stdin.isatty():
         news = lstm['tokenizer'].texts_to_sequences(news)
         news = tf.keras.preprocessing.sequence.pad_sequences(news, padding='post', maxlen=256)
         pred = lstm['model'].predict(news)
-        print('fake' if pred < 1 else 'true')
+        print('fake' if pred < 0 else 'true')
 
-    def mongodb():
-        print("mongodb")
+    def image_prediction():
+        print("imagem")
 
     def default():
         print("Nao foi possivel continuar a solicitacao")
@@ -33,13 +33,12 @@ if not sys.stdin.isatty():
         data = json.loads(line)
         if data["type"] == 'start':
             lstm = load()
-            print("Modelo carregado")
+            print("started")
         else:
             {
                 'chat': chat_response,
                 'url': prediction,
-                'image': prediction,
-                'feedback': mongodb
+                'image': image_prediction
             }.get(data["type"], default)()
 else:
     print("Servidor finalizou o request.")

@@ -1,0 +1,8 @@
+{
+    "ola":  "Oi",
+    "oi":  "Olá",
+    "quem e voce?": "Olá eu sou o Genuíno 🕵️‍♂️, um robô criado para te auxiliar na checagem de fatos.\n 📰 Basta você me enviar uma notícia e eu direi se ela é falsa ou não.\n🟢 Eu consigo identificar o artigo através de links (devem conter o corpo da notícia).\nQuer saber mais sobre como enviar uma notícia para avaliação? Envie ajuda que eu te mostro!",
+    "preciso de ajuda": "Eu sou uma inteligência artificial treinada para classificar as notícias que me enviam.\nBasta enviar o link do artigo que irei obter as informações da notícia para avaliação.\nPara notícias contidas em imagens é necessário conter todo o corpo da notícia, envie a imagem que eu faço a análise (Ex: https://www.site.com/alguma-noticia).\nEm caso de insatisfação, é possível fornecer um feedback após a classificação do artigo.",
+    "ajuda": "Eu sou uma inteligência artificial treinada para classificar as notícias que me enviam.\n Basta enviar o link do artigo que irei obter as informações da notícia para avaliação.\nPara notícias contidas em imagens é necessário conter todo o corpo da notícia, envie a imagem que eu faço a análise (Ex: https://www.site.com/alguma-noticia).\nEm caso de insatisfação, é possível fornecer um feedback após a classificação do artigo.",
+    "default": "Não entendi."
+}

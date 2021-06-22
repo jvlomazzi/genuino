@@ -13,7 +13,7 @@ module.exports = class Chatbot {
     client;
     route = "controllers/routes.py";
     python;
-    post = { type: "", data: "" };
+    request = { type: "", data: "" };
     
 
     constructor(){
@@ -64,43 +64,28 @@ module.exports = class Chatbot {
 
     listen()
     {
-        this.startBackendServer();
         // adicionar listener para quando o robo for adicionado no grupo ele deve se apresentar
         // adicionar listener para quando alguem marca-lo em uma mensagem ele deve passar pelas mesmas etapas do onmessage
         this.client.onMessage((message) => {
             //Verifica se a mensagem é um tipo valido, caso não retorna mensagem do chatbot
+            this.setMessage(message);
             this.verifyMessage(this.getClient, message);
         });
     }
 
-    startBackendServer(){
-        // this.setServerArgs('initialize');
-        this.post = { type: 'initialize' };
-        this.sendToServer('start');
-    }
-    
     verifyMessage(client, message) {
         let type = message.type;
         let body = message.body;
         if(type == 'chat'){
-            if (this.isValidUrl(body)){
-                console.log("chegou url");
-                this.post = {
-                    type: 'url',
-                    data: body
-                };
-                this.sendToServer('predict');
+            if(this.isValidUrl(body)){
+                this.get('predict_url', 'url', body);
             }else{
-                console.log("chegou chat");
-                this.post = {
-                    type: 'chat',
-                    data: body
-                };
-                this.sendToServer('chat');
+                
+                this.get('chat', 'url', body);
             }
-            
         }else if (type == 'image'){
-            this.sendImageToServer(message);
+            let base64 = JSON.stringify(val);
+            this.get('predict_image', 'url', base64);
         }else{
             throw "Invalid message type";
         }
@@ -116,41 +101,72 @@ module.exports = class Chatbot {
         return !!pattern.test(str);
     }
 
-    async sendImageToServer(message){
-        var promise = this.client.downloadMedia(message.id);
-        var chat = this;
-        await promise.then(function(val){
-            chat.setMessage(val);
-            let base64 = JSON.stringify(val);
-            fs.writeFile('tokens/base64.json', base64, 'utf8', function(errfs){
-                if(errfs){ 
-                    throw errfs; 
-                }else{
-                    chat.setServerArgs('image');
-                    chat.sendToServer();
-                }
-            });
-        }).catch(function(err){
-            console.log(err)
+    createImageJson(val){
+        let base64 = JSON.stringify(val);
+        fs.writeFile('tokens/base64.json', base64, 'utf8', function(errfs){
+            if(errfs){ 
+                throw errfs; 
+            }else{
+                return true;
+            }
         });
     }
 
-    async sendToServer(route){
+    async get(route, type = null, data = null){
+        let params = (type !== null ? route + "?type=" + type + "&data=" + data : route);
+
+        let fetched = await fetch('http://localhost:3000/' + params)
+        .then(res => res.json())
+        .catch(err => console.log(err));
+
+        return this.sendToClient(fetched.response);
+    }
+
+    async post(route, type, data = null){
+          // this.request = {
+                //     type: 'url',
+                //     data: body
+                // };
         var post = JSON.stringify(this.post);
-        let response = await fetch('http://localhost:5000/' + route, {
+
+        let fetched = await fetch('http://localhost:3000/' + route, {
             method: 'post',
             body: post,
             headers: { 'Content-Type': 'application/json' }
-        });
-        let myJson = await response.json(); //extract JSON from the http response
-        console.log(myJson);
+        })
+        .then(res => res.json())
+        .then(json => console.log(json))
+        .catch(err => console.log(err));
+
+        console.log(fetched.response);
+    }
+
+    async sendToServer(route){
         // pyshell.PythonShell.run(this.route, this.options, function(err, res){ if(err) throw err; else console.log(res); });
     }
+
+    formatMessage(message){
+        let ret = "";
+        switch(message){
+            case 'fake':
+                ret = "❌ A notícia foi considerada FALSA.";
+                break;
+            case 'true':
+                ret = "✅ A notícia foi classificada como VERDADEIRA";
+                break;
+            case 'retorno':
+                ret = "A minha resposta foi útil? Se for possível, dê seu feedback. 😁";
+                break;
+            default:
+                ret = message;
+                break;
+        }
+        return ret;
+    }
     
-    sendToClient(){
-        this.getClient().sendText(this.getReceiver(this.getMessage), this.getMessage).then((result) => {
-             console.log('Result: ', result); 
-        }).catch((err) => { 
+    sendToClient(message){
+        message = this.formatMessage(message);
+        this.getClient().sendText(this.getReceiver(this.getMessage()), message).catch((err) => { 
             console.error('Error when sending: ', err); 
         });
     }

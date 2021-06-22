@@ -3,46 +3,63 @@ const http = require('http')
 const async = require('async');
 const {PythonShell} = require('python-shell');
 const { stringify } = require('querystring');
-
+const fs = require('fs');
+const chat = JSON.parse(fs.readFileSync('../lib/chatting/chat.json', 'utf8'));
 let pyshell = new PythonShell('server.py', { pythonOptions: ['-u'] });
-
 const app = express();
-globalRes = {};
+const globalRes = {};
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-app.listen(3000);
+pyshell.on('message', function (message) {
+    if(message !== 'started')
+        globalRes.res.status(200).json({ response: message });
+    else
+        console.log(message);
+});
 
+let createRequest = (type, data) => {
+    return JSON.stringify({"type": type, "data": data});
+}
 
-
-app.post('/', async(req, res) => {
-    let data = JSON.stringify({"type": req.body.type, "data": req.body.data});
-    // pyshell.on('message', function (message) { res.status(200).json({ response: 'ok' }); });
-    // pyshell.on('message', function (message) { console.log(message) });
-    pyshell.send(data);
-    globalRes.res = res;
-    // await new Promise(() => {
-    //     // pyshell.on('message', function (message) { res.status(200).json({ response: 'ok' }); });
-    //     pyshell.send(data)
-    // }).then( (result) => {
-    //     res.status(200).json({ response: 'ok' });
-    // }).catch((error) => {
-    //     res.status(500).json({ response: 'error' });
-    // });
-    // try {
-    //     await pyshell.send(data).end(function(err){
-    //         if (err) handleError(err);
-    //         else res.status(200).json({ response: 'ok' });
-    //     })
-        
-    // } catch (error) {
-    //     res.status(500).json({ response: 'error' });
-    // }
+app.listen(3000, () => {
+    try{
+        let data = createRequest("start", null);
+        pyshell.send(data);
+    }catch(error){
+        console.log("Erro ao iniciar o servidor python: " + error);
+    }
 });
 
 
-pyshell.on('message', function (message) { 
-    console.log(message); 
-    globalRes.res.status(200).json({ response: 'ok' }); 
+app.get('/chat', async(req, res) => {
+    console.log(req.query.type);
+    console.log(req.query.data);
+
+    try{
+        let string = req.query.data;
+        string = string.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+        res.status(200).json({ response: chat[string] });
+    }catch(error){
+        res.status(500).json({ response: 'error' });
+    }
+});
+
+
+app.get('/predict_image', async(req, res) => {
+    let data = createRequest(req.query.type, req.query.data);
+});
+
+app.get('/predict_url', async(req, res) => {
+    console.log(req.query.type);
+    console.log(req.query.data);
+    let data = createRequest(req.query.type, req.query.data);
+
+    try{
+        pyshell.send(data);
+        globalRes.res = res;
+    }catch(error){
+        res.status(500).json({ response: 'error' });
+    }
 });
